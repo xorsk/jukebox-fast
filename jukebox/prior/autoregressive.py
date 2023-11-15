@@ -22,6 +22,11 @@ def split_chunks(length, chunk_size):
     assert sum(chunk_sizes) == length
     return chunk_sizes
 
+total_memory = t.cuda.get_device_properties(0).total_memory
+def empty_cache_if_needed():
+    if t.cuda.memory_reserved() / total_memory > 0.8:
+        t.cuda.empty_cache()
+
 class PositionEmbedding(nn.Module):
     def __init__(self, input_shape, width, init_scale=1.0, pos_init=False):
         super().__init__()
@@ -317,6 +322,8 @@ class ConditionalAutoregressive2D(nn.Module):
                 else:
                     del x_prime
 
+                empty_cache_if_needed()
+
             if get_preds:
                 x_prime = t.cat(x_primes, dim=1)
                 assert x_prime.shape == (n_samples, len(xs), self.width)
@@ -345,6 +352,8 @@ class ConditionalAutoregressive2D(nn.Module):
                 x = t.distributions.Categorical(logits=x).sample() # Sample and replace x
                 assert x.shape == (n_samples, 1)
                 xs.append(x.clone())
+
+                empty_cache_if_needed()
 
             del x
             self.transformer.del_cache()
