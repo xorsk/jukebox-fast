@@ -1,3 +1,5 @@
+import os
+
 import torch.distributed as dist
 from enum import Enum
 
@@ -16,7 +18,8 @@ class ReduceOp(Enum):
         }[self]
 
 def is_available():
-    return dist.is_available()
+    # not available on windows
+    return dist.is_available() if os.getenv("NCCL") == "1" else False
 
 def get_rank():
     if is_available():

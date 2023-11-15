@@ -6,7 +6,7 @@ import os
 import sys
 
 def def_tqdm(x):
-    return tqdm(x, leave=True, file=sys.stdout, bar_format="{n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}{postfix}]")
+    return tqdm(x, delay=1, smoothing=0, leave=True, file=sys.stdout, bar_format="{n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}{postfix}]")
 
 def get_range(x):
     if dist.get_rank() == 0:

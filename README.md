@@ -1,3 +1,15 @@
+Install
+```
+pip install -r requirements.txt
+pip install torchvision==0.10.0+cu111 --index-url https://download.pytorch.org/whl/cu111
+```
+
+Env variable for NCCL
+```
+NCCL=1
+```
+
+- - -
 **Status:** Archive (code is provided as-is, no updates expected)
 
 # Jukebox
