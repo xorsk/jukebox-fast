@@ -272,7 +272,7 @@ def run(model, mode='ancestral', codes_file=None, audio_file=None, prompt_length
     hps = Hyperparams(**kwargs)
     sample_hps = Hyperparams(dict(mode=mode, codes_file=codes_file, audio_file=audio_file, prompt_length_in_seconds=prompt_length_in_seconds))
 
-    with t.no_grad():
+    with t.inference_mode():
         save_samples(model, device, hps, sample_hps)
 
 if __name__ == '__main__':

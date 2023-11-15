@@ -87,7 +87,7 @@ class FactoredAttention(nn.Module):
             w = t.matmul(q, k)
             w.mul_(scale*scale)
         wtype = w.dtype
-        w = w.float()
+
         if self.mask:
             # Generate appropriate mask to mask out all positions before current
             # Might take up lot of memory for dense, so can cache it

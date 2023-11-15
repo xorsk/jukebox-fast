@@ -1,10 +1,13 @@
+This fork works with fp16.
+Only the primed mode has been tested.
+
 Install
 ```
 pip install -r requirements.txt
 pip install torchvision==0.10.0+cu111 --index-url https://download.pytorch.org/whl/cu111
 ```
 
-Env variable for NCCL
+Env variable for NCCL (do not set on windows/wsl)
 ```
 NCCL=1
 ```

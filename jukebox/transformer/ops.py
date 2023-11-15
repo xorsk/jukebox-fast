@@ -13,15 +13,15 @@ except ImportError:
 
 class LayerNorm(FusedLayerNorm):
     def __init__(self, normalized_shape, eps=1e-5, elementwise_affine=True):
-        super().__init__(normalized_shape, eps=eps, elementwise_affine=elementwise_affine)
+        super().__init__(normalized_shape, eps=eps, elementwise_affine=elementwise_affine, dtype=t.float16)
         self.width = np.prod(normalized_shape)
         self.max_numel = 65535*self.width
 
     def forward(self, input):
         if input.numel() > self.max_numel:
-            return F.layer_norm(input.float(), self.normalized_shape, self.weight, self.bias, self.eps).type_as(input)
+            return F.layer_norm(input.float(), self.normalized_shape, self.weight, self.bias, self.eps)
         else:
-            return super(LayerNorm, self).forward(input.float()).type_as(input)
+            return super(LayerNorm, self).forward(input)
 
 def gelu(x):
     return 0.5 * x * (1 + t.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * t.pow(x, 3))))
@@ -91,12 +91,12 @@ class Conv1D(nn.Module):
             w = t.empty(n_in, n_out)
             nn.init.normal_(w, std=0.02 * init_scale)
         b = t.zeros(n_out)
-        self.w = nn.Parameter(w)
-        self.b = nn.Parameter(b)
+        self.w = nn.Parameter(w.half())
+        self.b = nn.Parameter(b.half())
 
     def forward(self, x):
         size_out = (*x.size()[:-1], self.n_out)
-        x = t.addmm(self.b.type_as(x), x.view(-1, x.size(-1)), self.w.type_as(x)) # If x if float then float else half
+        x = t.addmm(self.b, x.view(-1, x.size(-1)), self.w.type_as(x)) # If x if float then float else half
         x = x.view(*size_out)
         return x
 
@@ -118,15 +118,17 @@ def filter_logits(logits, top_k=0, top_p=0.0, filter_value=-float('Inf')):
             top_p >0.0: keep the top tokens with cumulative probability >= top_p (nucleus filtering).
     """
     #assert logits.dim() == 2  # batch size 1 for now - could be updated for more but the code would be less clear
-    logits = logits.clone()
+
     top_k = min(top_k, logits.size(-1))  # Safety check
     assert (top_k == 0) or (top_p == 0.0)
     if top_k > 0:
+        logits = logits.clone()
         # Remove all tokens with a probability less than the last token of the top-k
         indices_to_remove = logits < t.topk(logits, top_k, dim=-1)[0][..., -1:]
         logits[indices_to_remove] = filter_value
 
     if top_p > 0.0:
+        logits = logits.clone()
         sorted_logits, sorted_indices = t.sort(logits, descending=True, dim=-1)
         cumulative_probs = t.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
 

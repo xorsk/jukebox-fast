@@ -44,7 +44,7 @@ class Conditioner(nn.Module):
         x = self.preprocess(x)
         x = self.cond(x)
         x = self.postprocess(x)
-        x = self.ln(x)
+        x = self.ln(x.half())
         return x
 
 def flip(x):

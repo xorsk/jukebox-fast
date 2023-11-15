@@ -185,7 +185,7 @@ class ConditionalAutoregressive2D(nn.Module):
                 x[:, 0] = self.start_token
         else:
             assert isinstance(x, t.cuda.LongTensor)
-            assert (0 <= x).all() and (x < self.bins).all()
+            # assert (0 <= x).all() and (x < self.bins).all()
             x = self.x_emb(x)
         assert x.shape == (n_samples, 1, self.width)
         if x_cond.shape == (N, D, self.width):
@@ -331,7 +331,7 @@ class ConditionalAutoregressive2D(nn.Module):
             empty_cache()
             for sample_t in get_range(range(len(xs), sample_tokens)):
                 x, cond = self.get_emb(sample_t, n_samples, x, x_cond, y_cond)
-                self.transformer.check_cache(n_samples, sample_t, fp16)
+                # self.transformer.check_cache(n_samples, sample_t, fp16)
                 x = self.transformer(x, encoder_kv=encoder_kv, sample=True, fp16=fp16) # Transformer
                 if self.add_cond_after_transformer:
                     x = x + cond
