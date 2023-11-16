@@ -19,7 +19,7 @@ class LayerNorm(FusedLayerNorm):
 
     def forward(self, input):
         if input.numel() > self.max_numel:
-            return F.layer_norm(input.float(), self.normalized_shape, self.weight, self.bias, self.eps)
+            return F.layer_norm(input, self.normalized_shape, self.weight, self.bias, self.eps)
         else:
             return super(LayerNorm, self).forward(input)
 
